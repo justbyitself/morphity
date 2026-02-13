@@ -1,0 +1,19 @@
+{
+  "name": "@justbyitself/morphity",
+  "version": "0.1.0",
+  "exports": "./src/index.js",
+  "tasks": {
+    "test": "deno test"
+  },
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 100,
+    "indentWidth": 2,
+    "semiColons": false
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended"]
+    }
+  }
+}
