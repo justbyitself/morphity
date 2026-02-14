@@ -2,7 +2,7 @@
 .deno/
 deno.lock
 
-# Node
+# Node (por si en el futuro)
 node_modules/
 package-lock.json
 

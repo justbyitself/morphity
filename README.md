@@ -1,40 +1,48 @@
 # Morphity
 
-A functional, trait-based polymorphism system for JavaScript using proxies and symbols.
+A functional, trait-based polymorphism system for JavaScript/TypeScript using proxies and symbols.
 
 ## Quick Start
 
 ```javascript
-import { createContainer, addSlot, addToTrait } from 'jsr:@justbyitself/morphity'
+import { createContainer, addSlot, defineTrait } from 'jsr:@justbyitself/morphity'
 
 // Create a container
 const container = createContainer()
 
-// Define a slot
-const draw = addSlot(container)
+// Define slots
+const toIterable = addSlot(container)
+const map = addSlot(container)
 
-// Add implementation to defaultTrait
-addToTrait([[
-  draw, 
-  proxy => Array.isArray(proxy) 
-    ? `Drawing array with ${proxy.length} items`
-    : `Drawing ${typeof proxy}`
-]])(container.defaultTrait)
+// Define traits declaratively
+defineTrait({
+  requires: value => Array.isArray(value),
+  provides: [[toIterable, proxy => proxy]]
+})(container)
 
-// Use it
-draw([1, 2, 3]) // "Drawing array with 3 items"
-draw("hello")   // "Drawing string"
+defineTrait({
+  requires: [toIterable],
+  provides: [[map, proxy => fn => {
+    const result = []
+    for (const item of toIterable(proxy)) result.push(fn(item))
+    return result
+  }]]
+})(container)
+
+// Use it - traits auto-apply!
+map([1, 2, 3])(x => x * 2)  // [2, 4, 6]
 ```
 
 ## Features
 
 - **Slot-based polymorphism** - Define behaviors through slots
-- **Composable traits** - Mix and match traits on any value
-- **Primitive support** - Works seamlessly with primitives and objects
-- **Functional style** - Clean, declarative API
-- **Zero dependencies** - Pure JavaScript with proxies
+- **Auto-applying traits** - Traits apply automatically based on predicates and dependencies
+- **Composable traits** - Build complex behaviors from simple traits
+- **Data-last support** - Built-in support for functional pipelines with `addSlotWithArity`
+- **Dependency resolution** - Automatic path finding and cycle detection
+- **Zero dependencies** - Pure JavaScript with no external dependencies
 
 ## Documentation
 
-See [GUIDE.md](./GUIDE.md) for detailed documentation and examples.
+See [GUIDE.md](https://github.com/justbyitself/morphity/blob/main/GUIDE.md) for detailed documentation and examples.
 

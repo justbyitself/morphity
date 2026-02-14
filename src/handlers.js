@@ -20,7 +20,7 @@ const handleToString = ({ item, prop }) =>
 
 const handleSlotAccess = ({ item, container, prop }) => {
   const slotId = prop
-  const slotImpl = item.customSlots.get(slotId) || container.defaultTrait.slots.get(slotId)
+  const slotImpl = item.customSlots.get(slotId)
   return slotImpl ? slotImpl(item.proxy) : undefined
 }
 

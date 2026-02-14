@@ -1,195 +1,311 @@
 # Morphity Guide
 
-A comprehensive guide to understanding and using Morphity's trait-based polymorphism system.
+Morphity provides a trait-based polymorphism system for JavaScript using slots, traits, and automatic dependency resolution.
 
 ## Core Concepts
 
 ### Containers
 
-A container holds the registry of items and their trait implementations.
+A container holds the runtime context for your traits and slots:
 
 ```javascript
-import { createContainer } from '@justbyitself/morphity'
+import { createContainer } from 'jsr:@justbyitself/morphity'
 
 const container = createContainer()
 ```
 
 ### Slots
 
-Slots define polymorphic operations. Think of them as method signatures that can have different implementations for different values.
+Slots are polymorphic functions that can have different implementations for different types:
 
 ```javascript
-import { addSlot } from '@justbyitself/morphity'
+import { addSlot } from 'jsr:@justbyitself/morphity'
 
 const draw = addSlot(container)
-const area = addSlot(container)
-const perimeter = addSlot(container)
+const onClick = addSlot(container)
 ```
 
 ### Traits
 
-Traits are collections of slot implementations. They define behavior for values.
-
-#### Default Trait
-
-Every container has a default trait that applies to all values.
+Traits define implementations for slots. Use `defineTrait` to create traits declaratively:
 
 ```javascript
-import { addToTrait } from '@justbyitself/morphity'
+import { defineTrait } from 'jsr:@justbyitself/morphity'
 
-// Add implementation to default trait
-addToTrait([[
-  draw,
-  proxy => `Drawing ${typeof proxy}`
-]])(container.defaultTrait)
+// Predicate-based trait (matches on value type)
+defineTrait({
+  requires: value => Array.isArray(value),
+  provides: [[draw, proxy => `Drawing array with ${proxy.length} items`]]
+})(container)
 
-draw("hello")  // "Drawing string"
-draw(42)       // "Drawing number"
+// Slot-based trait (requires other slots)
+defineTrait({
+  requires: [toIterable],  // needs toIterable slot
+  provides: [[map, proxy => fn => {
+    const result = []
+    for (const item of toIterable(proxy)) result.push(fn(item))
+    return result
+  }]]
+})(container)
 ```
 
-#### Custom Traits
+## Basic Usage
 
-Create custom traits for specific types or use cases.
+### Simple Example
 
 ```javascript
-import { defineTrait, addTrait } from '@justbyitself/morphity'
+const container = createContainer()
+const greet = addSlot(container)
 
-const shapeTrait = defineTrait(container)
+// Define trait for strings
+defineTrait({
+  requires: value => typeof value === 'string',
+  provides: [[greet, proxy => `Hello, ${proxy}!`]]
+})(container)
 
-addToTrait([
-  [draw, proxy => `Drawing ${proxy.type} at (${proxy.x}, ${proxy.y})`],
-  [area, proxy => proxy.width * proxy.height]
-])(shapeTrait)
+// Define trait for objects
+defineTrait({
+  requires: value => typeof value === 'object' && value.name,
+  provides: [[greet, proxy => `Hello, ${proxy.name}!`]]
+})(container)
 
-const rect = { type: 'rectangle', x: 10, y: 20, width: 50, height: 30 }
-const shapeRect = addTrait(shapeTrait)(rect)
-
-draw(shapeRect)  // "Drawing rectangle at (10, 20)"
-area(shapeRect)  // 1500
+// Auto-applies correct trait
+greet("Alice")           // "Hello, Alice!"
+greet({ name: "Bob" })   // "Hello, Bob!"
 ```
 
-### Composing Traits
+### Trait Composition
 
-Traits can be composed by applying them sequentially.
+Build complex behaviors by composing traits:
 
 ```javascript
-const drawable = defineTrait(container)
-addToTrait([[draw, proxy => `Drawing ${proxy.name}`]])(drawable)
+const container = createContainer()
+const toIterable = addSlot(container)
+const map = addSlot(container)
+const filter = addSlot(container)
 
-const clickable = defineTrait(container)
-addToTrait([[onClick, proxy => `Clicked ${proxy.name}`]])(clickable)
+// Base trait: arrays are iterable
+defineTrait({
+  requires: value => Array.isArray(value),
+  provides: [[toIterable, proxy => proxy]]
+})(container)
 
-const button = { name: 'Submit' }
-const interactiveButton = addTrait(clickable)(addTrait(drawable)(button))
+// Enumerable trait: requires toIterable, provides map and filter
+defineTrait({
+  requires: [toIterable],
+  provides: [
+    [map, proxy => fn => {
+      const result = []
+      for (const item of toIterable(proxy)) result.push(fn(item))
+      return result
+    }],
+    [filter, proxy => pred => {
+      const result = []
+      for (const item of toIterable(proxy)) {
+        if (pred(item)) result.push(item)
+      }
+      return result
+    }]
+  ]
+})(container)
 
-draw(interactiveButton)     // "Drawing Submit"
-onClick(interactiveButton)  // "Clicked Submit"
+// Use composed behavior
+const doubled = map([1, 2, 3])(x => x * 2)      // [2, 4, 6]
+const evens = filter([1, 2, 3, 4])(x => x % 2 === 0)  // [2, 4]
 ```
 
-## Working with Primitives
+## Auto-Application
 
-Morphity handles primitives transparently.
+Traits automatically apply based on:
+1. **Predicate matching**: When a value matches a predicate (e.g., `Array.isArray`)
+2. **Slot dependencies**: When required slots become available
 
 ```javascript
-const toUpper = addSlot(container)
-addToTrait([[toUpper, proxy => proxy.toUpperCase()]])(container.defaultTrait)
-
-toUpper("hello")  // "HELLO"
+// When you call map([1,2,3]), morphity:
+// 1. Detects [1,2,3] is an array
+// 2. Applies arrayIterableTrait (provides toIterable)
+// 3. Detects toIterable is now available
+// 4. Applies enumerableTrait (provides map)
+// 5. Executes map
 ```
 
-Primitive methods are automatically bound:
+This happens lazily - traits only apply when you use a slot.
+
+## Data-Last Support
+
+For functional pipelines, use `addSlotWithArity`:
 
 ```javascript
-const len = addSlot(container)
-addToTrait([[len, proxy => proxy.length]])(container.defaultTrait)
+import { addSlotWithArity } from 'jsr:@justbyitself/morphity'
 
-len("hello")     // 5
-len([1, 2, 3])   // 3
+const map = addSlotWithArity(2)(container)  // arity 2: fn + data
+
+defineTrait({
+  requires: value => Array.isArray(value),
+  provides: [[map, proxy => fn => proxy.map(fn)]]
+})(container)
+
+// Data-last style (Ramda-like)
+map(x => x * 2)([1, 2, 3])  // [2, 4, 6]
+
+// Perfect for pipelines
+const pipeline = compose(
+  map(x => x * 2),
+  filter(x => x > 5),
+  take(3)
+)
+
+pipeline([1, 2, 3, 4, 5])
 ```
 
-## Helpers
-
-### typeOf
-
-Get the actual type of a value, even if wrapped in a proxy.
-
+Regular `addSlot` is data-first:
 ```javascript
-import { typeOf } from '@justbyitself/morphity'
+const length = addSlot(container)
 
-typeOf("hello")  // "string"
-typeOf(42)       // "number"
-typeOf([])       // "object"
+defineTrait({
+  requires: value => Array.isArray(value) || typeof value === 'string',
+  provides: [[length, proxy => proxy.length]]
+})(container)
+
+length([1, 2, 3])    // 3 (data-first)
+length("hello")      // 5
 ```
 
-### equalsTo
+## Advanced: Multiple Requirements
 
-Compare values correctly, unwrapping proxies.
+Traits can require multiple slots:
 
 ```javascript
-import { equalsTo } from '@justbyitself/morphity'
+const toIterable = addSlot(container)
+const compare = addSlot(container)
+const sort = addSlot(container)
 
-equalsTo(42)(42)        // true
-equalsTo("hi")("bye")   // false
+// Provides toIterable
+defineTrait({
+  requires: value => Array.isArray(value),
+  provides: [[toIterable, proxy => proxy]]
+})(container)
+
+// Provides compare
+defineTrait({
+  requires: value => Array.isArray(value),
+  provides: [[compare, proxy => (a, b) => a - b]]
+})(container)
+
+// Requires BOTH toIterable and compare
+defineTrait({
+  requires: [toIterable, compare],
+  provides: [[sort, proxy => [...toIterable(proxy)].sort(compare(proxy))]]
+})(container)
+
+sort([3, 1, 2])  // [1, 2, 3]
+```
+
+## Format Options
+
+`defineTrait` accepts two formats:
+
+**Object format (recommended):**
+```javascript
+defineTrait({
+  requires: value => Array.isArray(value),
+  provides: [[slot1, impl1], [slot2, impl2]]
+})(container)
+```
+
+**Array format (concise):**
+```javascript
+defineTrait([
+  value => Array.isArray(value),
+  [[slot1, impl1], [slot2, impl2]]
+])(container)
 ```
 
 ## Best Practices
 
-### Use descriptive slot names
+### Use Slots for Required Dependencies
+
+When a trait requires a slot, actually use it:
 
 ```javascript
-const calculateArea = addSlot(container)
-const renderToCanvas = addSlot(container)
+// ✅ GOOD - uses toIterable
+defineTrait({
+  requires: [toIterable],
+  provides: [[map, proxy => fn => {
+    const result = []
+    for (const item of toIterable(proxy)) result.push(fn(item))
+    return result
+  }]]
+})(container)
+
+// ❌ BAD - declares toIterable but doesn't use it
+defineTrait({
+  requires: [toIterable],
+  provides: [[map, proxy => fn => proxy.map(fn)]]  // uses .map() directly
+})(container)
 ```
 
-### Group related slots in traits
+### Separate Concerns
+
+Keep traits focused and composable:
 
 ```javascript
-const geometryTrait = defineTrait(container)
-addToTrait([
-  [area, /* ... */],
-  [perimeter, /* ... */],
-  [centroid, /* ... */]
-])(geometryTrait)
+// ✅ GOOD - separate base and derived traits
+defineTrait({
+  requires: value => Array.isArray(value),
+  provides: [[toIterable, proxy => proxy]]
+})(container)
+
+defineTrait({
+  requires: [toIterable],
+  provides: [[map, /* ... */], [filter, /* ... */]]
+})(container)
+
+// ❌ BAD - mixing concerns
+defineTrait({
+  requires: value => Array.isArray(value),
+  provides: [[toIterable, /* ... */], [map, /* ... */]]  // mixed levels
+})(container)
 ```
 
-### Leverage the default trait for common behavior
+### Choose the Right Arity
+
+Use data-last for pipeline operations, data-first for simple accessors:
 
 ```javascript
-// Default behavior for all values
-addToTrait([[
-  serialize,
-  proxy => JSON.stringify(proxy)
-]])(container.defaultTrait)
+// Pipeline operations → data-last
+const map = addSlotWithArity(2)(container)
+const filter = addSlotWithArity(2)(container)
+
+// Simple accessors → data-first
+const length = addSlot(container)
+const first = addSlot(container)
 ```
 
-### Compose traits for flexibility
+## Error Handling
+
+If no trait provides a slot, an error is thrown:
 
 ```javascript
-const entity = addTrait(renderable)(
-  addTrait(collidable)(
-    addTrait(movable)(obj)
-  )
-)
+const mySlot = addSlot(container)
+
+mySlot([1, 2, 3])  // Error: Slot not implemented
 ```
 
-## Advanced Patterns
+Always define traits for the types you'll use.
 
-### Trait inheritance
+## Cycle Detection
 
-Traits can be incrementally extended.
+Morphity detects circular dependencies:
 
 ```javascript
-const baseTrait = defineTrait(container)
-addToTrait([[draw, proxy => 'Base drawing']])(baseTrait)
+defineTrait({
+  requires: [slotB],
+  provides: [[slotA, /* ... */]]
+})(container)
 
-// Extend with more slots
-addToTrait([[onClick, proxy => 'Base click']])(baseTrait)
-addToTrait([[onHover, proxy => 'Base hover']])(baseTrait)
+defineTrait({
+  requires: [slotA],  // Creates cycle: A needs B, B needs A
+  provides: [[slotB, /* ... */]]
+})(container)  // Error: Circular dependency detected
 ```
-
-## Performance Notes
-
-- Proxies add minimal overhead
-- Slot lookups are fast (Map-based)
-- Traits are applied once, not on every access
-- Primitive delegation is optimized

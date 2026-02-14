@@ -1,4 +1,4 @@
 export { createContainer } from './container.js'
-export { addSlot } from './slots.js'
-export { defineTrait, addToTrait, addTrait } from './traits.js'
+export { addSlot, addSlotWithArity } from './slots.js'
+export { defineTrait, apply } from './traits.js'
 export { typeOf, equalsTo } from './helpers.js'

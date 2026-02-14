@@ -1,3 +1,5 @@
+import { createTraitRegistry } from './trait-registry.js'
+
 export const createContainer = () => {
   const container = {
     symbols: {
@@ -5,14 +7,8 @@ export const createContainer = () => {
       target: Symbol('target')
     },
     items: new Map(),
-    defaultTrait: {
-      slots: new Map(),
-      container: null
-    }
+    traitRegistry: createTraitRegistry()
   }
-  
-  // Set circular reference
-  container.defaultTrait.container = container
   
   return container
 }

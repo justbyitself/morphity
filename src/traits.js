@@ -1,20 +1,45 @@
 import { ensureItemProxy } from './items.js'
 
-export const defineTrait = (container) => {
-  return {
-    slots: new Map(),
-    container
+export const defineTrait = (config) => (container) => {
+  // Normalize format: accept both object and array
+  const [requires, providesArray] = Array.isArray(config)
+    ? config  // [requires, [[slot, impl], ...]]
+    : [config.requires, config.provides]  // { requires, provides: [[slot, impl], ...] }
+  
+  // Detect trait type
+  const isPredicateTrait = typeof requires === 'function'
+  
+  // Convert provides array to Map and extract slot references
+  const slots = new Map()
+  const providesSlots = []
+  
+  for (const [slot, impl] of providesArray) {
+    slots.set(slot.id, impl)
+    providesSlots.push(slot)
   }
-}
-
-export const addToTrait = (slotImplementations) => (trait) => {
-  for (const [slot, impl] of slotImplementations) {
-    trait.slots.set(slot.id, impl)
-  }
+  
+  // Create trait object
+  const trait = isPredicateTrait
+    ? {
+        requiresValue: requires,
+        provides: providesSlots,
+        slots,
+        container
+      }
+    : {
+        requiresSlots: requires,
+        provides: providesSlots,
+        slots,
+        container
+      }
+  
+  // Register trait
+  container.traitRegistry.register(trait)
+  
   return trait
 }
 
-export const addTrait = (trait) => (value) => {
+export const apply = (trait) => (value) => {
   const container = trait.container
   const proxy = ensureItemProxy(value, container)
   

@@ -17,3 +17,6 @@ export const firstDefined = (...fns) => {
   }
   return undefined
 }
+
+// Flip the order of arguments for a binary function
+export const flip = fn => a => b => fn(b)(a)
