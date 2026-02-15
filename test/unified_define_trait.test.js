@@ -13,7 +13,7 @@ Deno.test("defineTrait with object format - predicate trait", () => {
   })(container)
   
   const result = toIterable([1, 2, 3])
-  assertEquals(result, [1, 2, 3])
+  assertEquals([...result], [1, 2, 3])
 })
 
 Deno.test("defineTrait with array format - predicate trait", () => {
@@ -26,7 +26,7 @@ Deno.test("defineTrait with array format - predicate trait", () => {
   ])(container)
   
   const result = toIterable([1, 2, 3])
-  assertEquals(result, [1, 2, 3])
+  assertEquals([...result], [1, 2, 3])
 })
 
 Deno.test("defineTrait with object format - slot trait", () => {
