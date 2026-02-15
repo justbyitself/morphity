@@ -32,8 +32,8 @@ const handlePrimitiveDelegation = ({ item, prop }) => {
     : propValue
 }
 
-const handleObjectProperty = ({ target, prop }) =>
-  Reflect.get(target, prop)
+const handleObjectProperty = ({ target, prop, receiver }) =>
+  Reflect.get(target, prop, receiver)
 
 const handleObjectToString = ({ target, prop }) =>
   prop === 'toString' ? target.toString.bind(target) : undefined
