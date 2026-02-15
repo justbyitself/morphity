@@ -2,7 +2,7 @@ import { ensureItemProxy } from './items.js'
 
 export const defineTrait = (config) => (container) => {
   // Normalize format: accept both object and array
-  const [requires, providesArray] = Array.isArray(config)
+  const [requires = [], providesArray] = Array.isArray(config)
     ? config  // [requires, [[slot, impl], ...]]
     : [config.requires, config.provides]  // { requires, provides: [[slot, impl], ...] }
   
