@@ -1,7 +1,3 @@
-// ============================================================================
-// INTERNAL UTILITIES
-// ============================================================================
-
 // Check if a value is a primitive (not an object)
 export const isPrimitive = value => value !== Object(value)
 
