@@ -1,5 +1,7 @@
 # Morphity
 
+[![JSR](https://jsr.io/badges/@justbyitself/morphity)](https://jsr.io/@justbyitself/morphity) [![Built for Deno](https://img.shields.io/badge/built%20for-Deno-black?logo=deno)](https://deno.com)
+
 A functional, trait-based polymorphism system for JavaScript/TypeScript using proxies and symbols.
 
 ## Quick Start
@@ -38,11 +40,10 @@ map([1, 2, 3])(x => x * 2)  // [2, 4, 6]
 - **Slot-based polymorphism** - Define behaviors through slots
 - **Auto-applying traits** - Traits apply automatically based on predicates and dependencies
 - **Composable traits** - Build complex behaviors from simple traits
-- **Data-last support** - Built-in support for functional pipelines with `addSlotWithArity`
+- **Data-last support** - Easy to wrap slots for functional pipelines
 - **Dependency resolution** - Automatic path finding and cycle detection
 - **Zero dependencies** - Pure JavaScript with no external dependencies
 
 ## Documentation
 
 See [GUIDE.md](https://github.com/justbyitself/morphity/blob/main/GUIDE.md) for detailed documentation and examples.
-

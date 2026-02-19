@@ -133,42 +133,20 @@ This happens lazily - traits only apply when you use a slot.
 
 ## Data-Last Support
 
-For functional pipelines, use `addSlotWithArity`:
+Morphity slots are data-first by nature. For data-last pipelines, wrap the slot manually:
 
 ```javascript
-import { addSlotWithArity } from 'jsr:@justbyitself/morphity'
-
-const map = addSlotWithArity(2)(container)  // arity 2: fn + data
+const map = addSlot(container)
 
 defineTrait({
   requires: value => Array.isArray(value),
   provides: [[map, proxy => fn => proxy.map(fn)]]
 })(container)
 
-// Data-last style (Ramda-like)
-map(x => x * 2)([1, 2, 3])  // [2, 4, 6]
+// Data-last wrapper
+const mapL = fn => data => map(data)(fn)
 
-// Perfect for pipelines
-const pipeline = compose(
-  map(x => x * 2),
-  filter(x => x > 5),
-  take(3)
-)
-
-pipeline([1, 2, 3, 4, 5])
-```
-
-Regular `addSlot` is data-first:
-```javascript
-const length = addSlot(container)
-
-defineTrait({
-  requires: value => Array.isArray(value) || typeof value === 'string',
-  provides: [[length, proxy => proxy.length]]
-})(container)
-
-length([1, 2, 3])    // 3 (data-first)
-length("hello")      // 5
+mapL(x => x * 2)([1, 2, 3])  // [2, 4, 6]
 ```
 
 ## Advanced: Multiple Requirements
@@ -268,29 +246,44 @@ defineTrait({
 })(container)
 ```
 
-### Choose the Right Arity
+### Choose the Right Style
 
 Use data-last for pipeline operations, data-first for simple accessors:
 
 ```javascript
-// Pipeline operations → data-last
-const map = addSlotWithArity(2)(container)
-const filter = addSlotWithArity(2)(container)
+// Pipeline operations → wrap manually for data-last
+const map = addSlot(container)
+const mapL = fn => data => map(data)(fn)
 
-// Simple accessors → data-first
+// Simple accessors → data-first is fine
 const length = addSlot(container)
 const first = addSlot(container)
 ```
 
 ## Error Handling
 
-If no trait provides a slot, an error is thrown:
+If no trait provides a slot, a `SlotNotImplementedError` is thrown:
 
 ```javascript
+import { SlotNotImplementedError } from 'jsr:@justbyitself/morphity'
+
 const mySlot = addSlot(container)
 
-mySlot([1, 2, 3])  // Error: Slot not implemented
+try {
+  mySlot([1, 2, 3])
+} catch (e) {
+  if (e instanceof SlotNotImplementedError) {
+    console.log(e.message)  // short: slot name and value
+    console.log(e.detail)   // verbose: available slots and trait resolution info
+  }
+}
 ```
+
+The error exposes:
+- `message` — short description, suitable for logs and stack traces
+- `detail` — extended context: which slots were available and whether any traits matched
+- `slotId` — the Symbol of the slot that failed
+- `item` — the internal item object
 
 Always define traits for the types you'll use.
 
