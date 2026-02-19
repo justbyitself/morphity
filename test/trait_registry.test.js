@@ -1,5 +1,6 @@
 import { assertEquals, assertThrows } from "https://deno.land/std@0.203.0/assert/mod.ts"
 import { createContainer, addSlot, defineTrait } from "../src/index.js"
+import { SlotNotImplementedError } from "../src/errors.js"
 
 Deno.test("container has traitRegistry", () => {
   const container = createContainer()
@@ -37,8 +38,8 @@ Deno.test("auto-apply traits with toIterable slot", () => {
 Deno.test("auto-apply fails when trait not registered", () => {
   const container = createContainer()
   const toIterable = addSlot(container)
-  
+
   assertThrows(() => {
     toIterable([1, 2, 3])
-  }, Error, "Slot not implemented")
+  }, SlotNotImplementedError)
 })
