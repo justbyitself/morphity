@@ -1,5 +1,6 @@
 import { ensureItemProxy } from './items.js'
 
+/** Registers a trait that provides slot implementations, either for values matching a predicate or for items that already have certain slots. */
 export const defineTrait = (config) => (container) => {
   // Normalize format: accept both object and array
   const [requires = [], providesArray] = Array.isArray(config)
@@ -39,6 +40,7 @@ export const defineTrait = (config) => (container) => {
   return trait
 }
 
+/** Manually applies a trait to a value, bypassing automatic resolution. */
 export const apply = (trait) => (value) => {
   const container = trait.container
   const proxy = ensureItemProxy(value, container)

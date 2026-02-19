@@ -1,5 +1,6 @@
 import { createTraitRegistry } from './trait-registry.js'
 
+/** Creates a new runtime context that holds slots, traits, and items. */
 export const createContainer = () => {
   const container = {
     symbols: {

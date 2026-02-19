@@ -35,6 +35,7 @@ const createSlotFunc = (slotId, container) => (value) => {
   return result
 }
 
+/**  Adds a new anonymous polymorphic slot to a container. */
 export const addSlot = (container) => {
   const slotId = Symbol()
   const slotFunc = createSlotFunc(slotId, container)
@@ -42,6 +43,7 @@ export const addSlot = (container) => {
   return slotFunc
 }
 
+/**  Adds a new polymorphic slot with a named Symbol, useful for debugging. */
 export const addSlotWithDescription = (description) => (container) => {
   const slotId = Symbol(description)
   const slotFunc = createSlotFunc(slotId, container)
