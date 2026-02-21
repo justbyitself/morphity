@@ -16,3 +16,6 @@ export const firstDefined = (...fns) => {
 
 // Flip the order of arguments for a binary function
 export const flip = fn => a => b => fn(b)(a)
+
+// Check if a value is a valid slot
+export const isSlot = value => typeof value?.id === 'symbol'

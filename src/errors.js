@@ -20,3 +20,15 @@ export class SlotNotImplementedError extends Error {
       `  Trait resolution: ${traitsMsg}`
   }
 }
+
+export class InvalidSlotError extends Error {
+  constructor(value) {
+    const valueDesc = (() => {
+      try { return JSON.stringify(value) } catch { return String(value) }
+    })()
+    super(`Invalid slot: expected a slot but got: ${valueDesc}`)
+    this.name = 'InvalidSlotError'
+    this.value = value
+    this.detail = `  A slot must be created with addSlot() or addSlotWithDescription()`
+  }
+}
