@@ -1,10 +1,11 @@
 import { paths } from './container.js'
-import { provides, requires } from './traits.js'
+import { provides, requires, traitDescription } from './traits.js'
 import { description } from './slots.js'
 
 const slotName = slot => description(slot) ?? '(anonymous)'
 
 const traitName = trait => {
+  if (traitDescription(trait)) return traitDescription(trait)
   if (trait.requiresValue) return `predicate trait`
   const reqNames = (requires(trait) ?? []).map(slotName).join(', ')
   return `slot trait [requires: ${reqNames}]`
