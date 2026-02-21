@@ -1,5 +1,5 @@
 import { ensureItemProxy } from './items.js'
-import { isSlot } from './utils.js'
+import { hasSlot } from './container.js'
 import { InvalidSlotError } from './errors.js'
 
 export const defineTrait = (config) => (container) => {
@@ -16,7 +16,7 @@ export const defineTrait = (config) => (container) => {
   const providesSlots = []
   
   for (const [slot, impl] of providesArray) {
-    if (!isSlot(slot)) throw new InvalidSlotError(slot)
+    if (!hasSlot(slot)(container)) throw new InvalidSlotError(slot)
     slots.set(slot.id, impl)
     providesSlots.push(slot)
   }

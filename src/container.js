@@ -7,6 +7,7 @@ export const createContainer = () => {
       target: Symbol('target')
     },
     items: new Map(),
+    slots: new Map(),
     resolver: createResolver()
   }
   
@@ -14,4 +15,4 @@ export const createContainer = () => {
 }
 
 export const hasSlot = slot => container =>
-  container.resolver.hasSlot(slot.id)
+  container.slots.has(slot.id)

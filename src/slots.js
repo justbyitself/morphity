@@ -41,6 +41,7 @@ export const addSlot = (container) => {
   const slotId = Symbol()
   const slotFunc = createSlotFunc(slotId, container)
   slotFunc.id = slotId
+  container.slots.set(slotId, slotFunc)
   return slotFunc
 }
 
@@ -48,5 +49,6 @@ export const addSlotWithDescription = (description) => (container) => {
   const slotId = Symbol(description)
   const slotFunc = createSlotFunc(slotId, container)
   slotFunc.id = slotId
+  container.slots.set(slotId, slotFunc)
   return slotFunc
 }

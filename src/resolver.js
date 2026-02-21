@@ -156,7 +156,6 @@ export const createResolver = () => {
   
   return {
     register,
-    resolveFor,
-    hasSlot: slotId => traits.some(t => t.provides?.some(s => s.id === slotId))
+    resolveFor
   }
 }
