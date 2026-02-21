@@ -67,3 +67,11 @@ export const traits = container => [...container.traits]
 export const provides = trait => [...trait.provides]
 
 export const requires = trait => trait.requiresValue ?? trait.requiresSlots ?? []
+
+export const defineTraitWithDescription = (description) => (config) => (container) => {
+  const trait = defineTrait(config)(container)
+  trait.description = description
+  return trait
+}
+
+export const traitDescription = trait => trait.description
