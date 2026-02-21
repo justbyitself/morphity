@@ -302,3 +302,71 @@ defineTrait({
   provides: [[slotB, /* ... */]]
 })(container)  // Error: Circular dependency detected
 ```
+
+## Reflection & Debugging
+
+Morphity exposes its internal state through a set of reflection functions, useful for understanding trait resolution and debugging unexpected behavior.
+
+### Inspecting Slots
+
+```javascript
+import { addSlotWithDescription, description, slots } from 'jsr:@justbyitself/morphity'
+
+const map = addSlotWithDescription('map')(container)
+
+description(map)       // 'map'
+slots(container)       // [map, filter, ...]  — all slots registered in this container
+hasSlot(map)(container) // true
+```
+
+### Inspecting Traits
+
+```javascript
+import { defineTraitWithDescription, traits, provides, requires, traitDescription } from 'jsr:@justbyitself/morphity'
+
+const trait = defineTraitWithDescription('arrayMap')({
+  requires: [toIterable],
+  provides: [[map, proxy => fn => [...toIterable(proxy)].map(fn)]]
+})(container)
+
+traitDescription(trait)  // 'arrayMap'
+provides(trait)          // [map]
+requires(trait)          // [toIterable]
+traits(container)        // all traits registered in this container
+```
+
+### Inspecting Resolution Paths
+
+```javascript
+import { paths } from 'jsr:@justbyitself/morphity'
+
+// Returns all trait paths morphity would use to resolve a slot for a value
+paths(map)(container)([1, 2, 3])
+// [[arrayIterableTrait, enumerableTrait]]
+```
+
+Each path is an ordered array of traits that would be applied in sequence to provide the slot.
+
+### explain
+
+For a human-readable summary of the resolution process, use `explain`:
+
+```javascript
+import { explain } from 'jsr:@justbyitself/morphity'
+
+console.log(explain(map)(container)([1, 2, 3]))
+// Resolving slot "map" for value: [1,2,3]
+//   Path 1:
+//     1. arrayIterable → provides: [toIterable]
+//     2. arrayMap → provides: [map]
+```
+
+If no traits match, `explain` tells you clearly:
+
+```javascript
+console.log(explain(map)(container)(42))
+// Resolving slot "map" for value: 42
+//   No paths found.
+```
+
+`explain` is particularly useful when a `SlotNotImplementedError` is thrown and you want to understand why no path was found.
