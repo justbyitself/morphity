@@ -52,3 +52,7 @@ export const addSlotWithDescription = (description) => (container) => {
   container.slots.set(slotId, slotFunc)
   return slotFunc
 }
+
+export const description = slot => slot.id.description
+
+export const slots = container => [...container.slots.values()]
