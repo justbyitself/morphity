@@ -8,9 +8,9 @@ export const createContainer = () => {
     },
     items: new Map(),
     slots: new Map(),
-    resolver: createResolver()
+    traits: [],
   }
-  
+  container.resolver = createResolver(container.traits)
   return container
 }
 

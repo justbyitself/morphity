@@ -38,6 +38,7 @@ export const defineTrait = (config) => (container) => {
   
   // Register trait
   container.resolver.register(trait)
+  container.traits.push(trait)
   
   return trait
 }
