@@ -15,4 +15,4 @@ export const createContainer = () => {
 }
 
 export const hasSlot = slot => container =>
-  container.slots.has(slot.id)
+  slot != null && container.slots.has(slot.id)
