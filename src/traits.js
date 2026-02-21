@@ -61,3 +61,9 @@ export const apply = (trait) => (value) => {
   
   return proxy
 }
+
+export const traits = container => [...container.traits]
+
+export const provides = trait => [...trait.provides]
+
+export const requires = trait => trait.requiresValue ?? trait.requiresSlots ?? []
