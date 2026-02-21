@@ -1,4 +1,5 @@
 import { createResolver } from './resolver.js'
+import { ensureItemProxy } from './items.js'
 
 export const createContainer = () => {
   const container = {
@@ -16,3 +17,9 @@ export const createContainer = () => {
 
 export const hasSlot = slot => container =>
   slot != null && container.slots.has(slot.id)
+
+export const paths = slot => container => value => {
+  const proxy = ensureItemProxy(value, container)
+  const item = container.items.get(proxy)
+  return container.resolver.resolveFor(item, slot.id)
+}
