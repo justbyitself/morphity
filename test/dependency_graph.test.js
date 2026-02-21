@@ -27,7 +27,7 @@ Deno.test("trait with multiple slot requirements", () => {
     customSlots: new Map()
   }
   
-  const paths = container.traitRegistry.resolveFor(item, sort.id)
+  const paths = container.resolver.resolveFor(item, sort.id)
   
   assertEquals(paths.length, 1)
   assertEquals(paths[0].length, 3)
@@ -65,7 +65,7 @@ Deno.test("long path with multiple intermediate slots", () => {
     customSlots: new Map()
   }
   
-  const paths = container.traitRegistry.resolveFor(item, slotD.id)
+  const paths = container.resolver.resolveFor(item, slotD.id)
   
   assertEquals(paths.length, 1)
   assertEquals(paths[0].length, 4)
@@ -120,7 +120,7 @@ Deno.test("multiple paths to same slot - choose shortest", () => {
     customSlots: new Map()
   }
   
-  const paths = container.traitRegistry.resolveFor(item, target.id)
+  const paths = container.resolver.resolveFor(item, target.id)
   
   assertEquals(paths.length >= 1, true)
   assertEquals(paths[0].length, 2)

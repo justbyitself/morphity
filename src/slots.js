@@ -13,6 +13,10 @@ const applyPath = (path, item) => {
   }
 }
 
+const throwIfNotImplemented = (result, slotId, item, paths) => {
+  if (isUndefined(result)) throw new SlotNotImplementedError(slotId, item, paths)
+}
+
 const createSlotFunc = (slotId, container) => (value) => {
   const proxy = ensureItemProxy(value, container)
   const item = container.items.get(proxy)
@@ -20,7 +24,7 @@ const createSlotFunc = (slotId, container) => (value) => {
   // Lazy resolution: only if slot not implemented
   let paths = []
   if (isUndefined(item.customSlots.get(slotId))) {
-    paths = container.traitRegistry.resolveFor(item, slotId)
+    paths = container.resolver.resolveFor(item, slotId)
 
     // Apply first path (predicates already validated in resolveFor)
     if (paths.length > 0) {
@@ -29,13 +33,10 @@ const createSlotFunc = (slotId, container) => (value) => {
   }
 
   const result = proxy[slotId]
-
-  if (isUndefined(result)) throw new SlotNotImplementedError(slotId, item, paths)
-
+  throwIfNotImplemented(result, slotId, item, paths)
   return result
 }
 
-/**  Adds a new anonymous polymorphic slot to a container. */
 export const addSlot = (container) => {
   const slotId = Symbol()
   const slotFunc = createSlotFunc(slotId, container)
@@ -43,7 +44,6 @@ export const addSlot = (container) => {
   return slotFunc
 }
 
-/**  Adds a new polymorphic slot with a named Symbol, useful for debugging. */
 export const addSlotWithDescription = (description) => (container) => {
   const slotId = Symbol(description)
   const slotFunc = createSlotFunc(slotId, container)

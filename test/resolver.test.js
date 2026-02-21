@@ -2,14 +2,14 @@ import { assertEquals, assertThrows } from "https://deno.land/std@0.203.0/assert
 import { createContainer, addSlot, defineTrait } from "../src/index.js"
 import { SlotNotImplementedError } from "../src/errors.js"
 
-Deno.test("container has traitRegistry", () => {
+Deno.test("container has resolver", () => {
   const container = createContainer()
-  assertEquals(typeof container.traitRegistry, 'object')
-  assertEquals(typeof container.traitRegistry.register, 'function')
-  assertEquals(typeof container.traitRegistry.resolveFor, 'function')
+  assertEquals(typeof container.resolver, 'object')
+  assertEquals(typeof container.resolver.register, 'function')
+  assertEquals(typeof container.resolver.resolveFor, 'function')
 })
 
-Deno.test("traitRegistry.register stores trait", () => {
+Deno.test("resolver.register stores trait", () => {
   const container = createContainer()
   const toIterable = addSlot(container)
   

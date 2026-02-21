@@ -1,6 +1,5 @@
-import { createTraitRegistry } from './trait-registry.js'
+import { createResolver } from './resolver.js'
 
-/** Creates a new runtime context that holds slots, traits, and items. */
 export const createContainer = () => {
   const container = {
     symbols: {
@@ -8,8 +7,11 @@ export const createContainer = () => {
       target: Symbol('target')
     },
     items: new Map(),
-    traitRegistry: createTraitRegistry()
+    resolver: createResolver()
   }
   
   return container
 }
+
+export const hasSlot = slot => container =>
+  container.resolver.hasSlot(slot.id)

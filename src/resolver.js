@@ -31,7 +31,7 @@ const hasCycle = (edges) => {
   return false
 }
 
-export const createTraitRegistry = () => {
+export const createResolver = () => {
   const traits = []
   const edges = new Map() // node → [dependencies]
   
@@ -156,6 +156,7 @@ export const createTraitRegistry = () => {
   
   return {
     register,
-    resolveFor
+    resolveFor,
+    hasSlot: slotId => traits.some(t => t.provides?.some(s => s.id === slotId))
   }
 }

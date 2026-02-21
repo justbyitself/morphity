@@ -37,7 +37,7 @@ export const defineTrait = (config) => (container) => {
       }
   
   // Register trait
-  container.traitRegistry.register(trait)
+  container.resolver.register(trait)
   
   return trait
 }

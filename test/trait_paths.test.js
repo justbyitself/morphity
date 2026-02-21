@@ -25,7 +25,7 @@ Deno.test("resolveFor returns paths to reach a slot", () => {
     customSlots: new Map()
   }
   
-  const paths = container.traitRegistry.resolveFor(item, map.id)
+  const paths = container.resolver.resolveFor(item, map.id)
   
   assertEquals(paths.length, 1)
   assertEquals(paths[0].length, 2)
@@ -60,7 +60,7 @@ Deno.test("resolveFor returns multiple paths for different predicates", () => {
     customSlots: new Map()
   }
   
-  const arrayPaths = container.traitRegistry.resolveFor(arrayItem, map.id)
+  const arrayPaths = container.resolver.resolveFor(arrayItem, map.id)
   assertEquals(arrayPaths.length, 1)
   
   const stringItem = {
@@ -68,7 +68,7 @@ Deno.test("resolveFor returns multiple paths for different predicates", () => {
     customSlots: new Map()
   }
   
-  const stringPaths = container.traitRegistry.resolveFor(stringItem, map.id)
+  const stringPaths = container.resolver.resolveFor(stringItem, map.id)
   assertEquals(stringPaths.length, 1)
 })
 
@@ -87,7 +87,7 @@ Deno.test("resolveFor returns empty array when no path exists", () => {
     customSlots: new Map()
   }
   
-  const paths = container.traitRegistry.resolveFor(item, map.id)
+  const paths = container.resolver.resolveFor(item, map.id)
   assertEquals(paths.length, 0)
 })
 
