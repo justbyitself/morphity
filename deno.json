@@ -1,10 +1,7 @@
 {
   "name": "@justbyitself/morphity",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "exports": "./src/index.js",
-  "tasks": {
-    "test": "deno test --allow-read"
-  },
   "fmt": {
     "useTabs": false,
     "lineWidth": 100,
